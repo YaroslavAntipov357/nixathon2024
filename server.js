@@ -9,7 +9,7 @@ app.use(cors())
 app.get('/healthz', (_req, res) => {
   res.setHeader('Content-Type', 'application/json');
   res.status(200);
-  res.send();
+  res.send({ status: 'OK' });
 });
 
 app.listen(port, () => {
