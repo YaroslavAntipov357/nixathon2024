@@ -110,7 +110,7 @@ const changePosition = (user, move) => {
     };
   }
   if (move === 'M') {
-    switch (user.user) {
+    switch (user?.user) {
       case 'PS':
         return { ...user, row: user.row + 1 };
       case 'PN':
@@ -152,7 +152,7 @@ const fireImmediately = (field, userObject, weights) => {
 };
 
 const checkCellAhead = (field, user, weights) => {
-  if (user.isNorth) {
+  if (user?.isNorth) {
     const nextCell = field[user.row - 1][user.column];
     if (nextCell === '_') {
       weights[ACTION_INDEX.move].value = weights[ACTION_INDEX.move].value + 1;
@@ -164,7 +164,7 @@ const checkCellAhead = (field, user, weights) => {
       weights[ACTION_INDEX.fire].value = weights[ACTION_INDEX.fire].value + 1;
     }
   }
-  if (user.isSouth) {
+  if (user?.isSouth) {
     const nextCell = field[user.row + 1][user.column];
     if (nextCell === '_') {
       weights[ACTION_INDEX.move].value = weights[ACTION_INDEX.move].value + 1;
@@ -176,7 +176,7 @@ const checkCellAhead = (field, user, weights) => {
       weights[ACTION_INDEX.fire].value = weights[ACTION_INDEX.fire].value + 1;
     }
   }
-  if (user.isEast) {
+  if (user?.isEast) {
     const nextCell = field[user.row][user.column + 1];
     if (nextCell === '_') {
       weights[ACTION_INDEX.move].value = weights[ACTION_INDEX.move].value + 1;
@@ -188,7 +188,7 @@ const checkCellAhead = (field, user, weights) => {
       weights[ACTION_INDEX.fire].value = weights[ACTION_INDEX.fire].value + 1;
     }
   }
-  if (user.isWest) {
+  if (user?.isWest) {
     const nextCell = field[user.row][user.column + 1];
     if (nextCell === '_') {
       weights[ACTION_INDEX.move].value = weights[ACTION_INDEX.move].value + 1;
@@ -207,6 +207,8 @@ app.post("/move", (req, res) => {
 
   res.setHeader('Content-Type', 'application/json');
   res.status(200);
+
+  console.log(gameMemory);
 
   if (!gameMemory[gameId]) {
     gameMemory[gameId] = {
@@ -232,7 +234,7 @@ app.post("/move", (req, res) => {
   const amountOfColumns = 13;
 
   checkCellAhead(field, user, weights);
-  fireImmediately(field, user, weights);
+  // fireImmediately(field, user, weights);
 
   for (
     let row = narrowingLevel;
@@ -264,11 +266,12 @@ app.post("/move", (req, res) => {
       ).action
     ];
 
-  const newPosition = user ?? changePosition(user, nextMove.move);
+  const newPosition = changePosition(user, nextMove.move);
 
   if (newPosition) {
-    user = newPosition;
+    gameMemory[gameId].user = newPosition;
   }
+  console.log(user, nextMove.move, newPosition);
 
   console.log(weights);
 
