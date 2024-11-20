@@ -161,7 +161,6 @@ const fireImmediately = (field, userObject, weights) => {
   );
   const { row, column, user } = userObject;
   let fieldOfView;
-  console.log(userObject);
   switch (user) {
     case "PE":
       fieldOfView = field[row].slice(column, column + 5);
@@ -170,10 +169,10 @@ const fireImmediately = (field, userObject, weights) => {
       fieldOfView = field[row].slice(column - 5, column);
       break;
     case "PN":
-      fieldOfView = transposedField.slice(row, row + 5);
+      fieldOfView = transposedField[column].slice(row - 5, row);
       break;
     case "PS":
-      fieldOfView = transposedField.slice(row - 5, row);
+      fieldOfView = transposedField[column].slice(row, row + 5);
       break;
   }
   const shouldFire = fieldOfView?.some((cell) => cell[0] === "E");
@@ -291,7 +290,7 @@ app.post("/move", (req, res) => {
   }
 
   checkCellAhead(field, user, weights);
-  // fireImmediately(field, user, weights);
+  fireImmediately(field, user, weights);
 
   for (
     let row = narrowingLevel;
