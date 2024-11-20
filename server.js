@@ -163,16 +163,16 @@ const fireImmediately = (field, userObject, weights) => {
   let fieldOfView;
   switch (user) {
     case "PE":
-      fieldOfView = field[row].slice(column, column + 5);
+      fieldOfView = field[row].slice(column, column + 4);
       break;
     case "PW":
-      fieldOfView = field[row].slice(column - 5, column);
+      fieldOfView = field[row].slice(column - 4, column);
       break;
     case "PN":
-      fieldOfView = transposedField[column].slice(row - 5, row);
+      fieldOfView = transposedField[column].slice(row - 4, row);
       break;
     case "PS":
-      fieldOfView = transposedField[column].slice(row, row + 5);
+      fieldOfView = transposedField[column].slice(row, row + 4);
       break;
   }
   const shouldFire = fieldOfView?.some((cell) => cell[0] === "E");
