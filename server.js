@@ -47,14 +47,18 @@ const ACTION_INDEX = {
 };
 
 const findInitialUser = (field) => {
-  if (field[1][6]?.includes('P')) {
-    return { row: 1, column: 6, user: field[1][6] };
-  } else if (field[6][1]?.includes('P')) {
-    return { row: 6, column: 1, user: field[6][1] };
-  } else if (field[11][6]?.includes('P')) {
-    return { row: 11, column: 6, user: field[11][6] };
-  } else if (field[6][11]?.includes('P')) {
-    return { row: 6, column: 11, user: field[6][11] };
+  if (field[1][6]?.includes("P")) {
+    const user = field[1][6];
+    return { row: 1, column: 6, user, isNorth: user.includes('N'), isSouth: user.includes('S'), isWest: user.includes('W'), isEast: user.includes('E') };
+  } else if (field[6][1]?.includes("P")) {
+    const user = field[6][1];
+    return { row: 6, column: 1, user, isNorth: user.includes('N'), isSouth: user.includes('S'), isWest: user.includes('W'), isEast: user.includes('E') };
+  } else if (field[11][6]?.includes("P")) {
+    const user = field[11][6];
+    return { row: 11, column: 6, user, isNorth: user.includes('N'), isSouth: user.includes('S'), isWest: user.includes('W'), isEast: user.includes('E') };
+  } else if (field[6][11]?.includes("P")) {
+    const user = field[6][11];
+    return { row: 6, column: 11, user, isNorth: user.includes('N'), isSouth: user.includes('S'), isWest: user.includes('W'), isEast: user.includes('E') };
   }
 };
 
@@ -119,31 +123,62 @@ const changePosition = (user, move) => {
   }
 };
 
-const fireImmediately = (field, userObject) => {
+const fireImmediately = (field, userObject, weights) => {
   const transposedField = field[0].map((_, colIndex) =>
-    array.map((row) => row[colIndex])
+    field.map((row) => row[colIndex])
   );
   const { row, column, user } = userObject;
-  const direction = user[-1];
   let fieldOfView;
-  switch (direction) {
-    case 'E':
+  console.log(userObject);
+  switch (user) {
+    case "PE":
       fieldOfView = field[row].slice(column, column + 5);
       break;
-    case 'W':
+    case "PW":
       fieldOfView = field[row].slice(column - 5, column);
       break;
-    case 'N':
+    case "PN":
       fieldOfView = transposedField.slice(row, row + 5);
       break;
-    case 'S':
+    case "PS":
       fieldOfView = transposedField.slice(row - 5, row);
       break;
   }
-  return fieldOfView.some((cell) => cell[0] === 'E');
+  const shouldFire = fieldOfView?.some((cell) => cell[0] === "E");
+
+  if (shouldFire) {
+    weights[ACTION_INDEX.fire].value = 100;
+  }
 };
 
-app.post('/move', (req, res) => {
+const checkCellAhead = (field, user, weights) => {
+  if (user.isNorth) {
+    const nextCell = field[user.row - 1][user.column];
+    if (nextCell === '_') {
+      weights[ACTION_INDEX.move].value = weights[ACTION_INDEX.move].value + 1;
+    }
+  }
+  if (user.isSouth) {
+    const nextCell = field[user.row + 1][user.column];
+    if (nextCell === '_') {
+      weights[ACTION_INDEX.move].value = weights[ACTION_INDEX.move].value + 1;
+    }
+  }
+  if (user.isEast) {
+    const nextCell = field[user.row][user.column + 1];
+    if (nextCell === '_') {
+      weights[ACTION_INDEX.move].value = weights[ACTION_INDEX.move].value + 1;
+    }
+  }
+  if (user.isWest) {
+    const nextCell = field[user.row][user.column + 1];
+    if (nextCell === '_') {
+      weights[ACTION_INDEX.move].value = weights[ACTION_INDEX.move].value + 1;
+    }
+  }
+}
+
+app.post("/move", (req, res) => {
   const { field, narrowingIn, gameId } = req.body;
 
   res.setHeader('Content-Type', 'application/json');
@@ -160,17 +195,20 @@ app.post('/move', (req, res) => {
     gameMemory[gameId].narrowingLevel = gameMemory[gameId].narrowingLevel + 1;
   }
 
-  const { narrowingLevel, user } = gameMemory[gameId];
+  let { narrowingLevel, user } = gameMemory[gameId];
 
   const weights = [
-    { action: 'MOVE', value: 1 },
-    { action: 'RIGHT', value: 0 },
-    { action: 'LEFT', value: 0 },
-    { action: 'FIRE', value: 0 },
+    { action: "MOVE", value: 0.1 },
+    { action: "RIGHT", value: 0 },
+    { action: "LEFT", value: 0 },
+    { action: "FIRE", value: 0 },
   ];
 
   const amountOfRows = 13;
   const amountOfColumns = 13;
+
+  checkCellAhead(field, user, weights);
+  fireImmediately(field, user, weights);
 
   for (
     let row = narrowingLevel;
@@ -205,8 +243,10 @@ app.post('/move', (req, res) => {
   const newPosition = user ?? changePosition(user, nextMove.move);
 
   if (newPosition) {
-    user.user = newPosition;
+    user = newPosition;
   }
+
+  console.log(weights);
 
   return res.send(nextMove);
 });
