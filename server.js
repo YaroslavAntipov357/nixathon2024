@@ -1,21 +1,21 @@
-const express = require("express");
+const express = require('express');
 const app = express();
-const cors = require("cors");
-const bodyParser = require("body-parser");
-const ICONS = require("./constants");
+const cors = require('cors');
+const bodyParser = require('body-parser');
+const ICONS = require('./constants');
 
 const NEXT_MOVE_RIGHT = {
-  S: "W",
-  W: "N",
-  N: "E",
-  E: "S",
+  S: 'W',
+  W: 'N',
+  N: 'E',
+  E: 'S',
 };
 
 const NEXT_MOVE_LEFT = {
-  S: "E",
-  E: "N",
-  N: "W",
-  W: "S",
+  S: 'E',
+  E: 'N',
+  N: 'W',
+  W: 'S',
 };
 
 const port = 3000;
@@ -24,19 +24,19 @@ app.use(cors());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
-app.get("/healthz", (_req, res) => {
-  res.setHeader("Content-Type", "application/json");
+app.get('/healthz', (_req, res) => {
+  res.setHeader('Content-Type', 'application/json');
   res.status(200);
-  res.send({ status: "OK" });
+  res.send({ status: 'OK' });
 });
 
 const gameMemory = {};
 
 const MOVES = {
-  MOVE: { move: "M" },
-  RIGHT: { move: "R" },
-  LEFT: { move: "L" },
-  FIRE: { move: "F" },
+  MOVE: { move: 'M' },
+  RIGHT: { move: 'R' },
+  LEFT: { move: 'L' },
+  FIRE: { move: 'F' },
 };
 
 const ACTION_INDEX = {
@@ -47,13 +47,13 @@ const ACTION_INDEX = {
 };
 
 const findInitialUser = (field) => {
-  if (field[1][6]?.includes("P")) {
+  if (field[1][6]?.includes('P')) {
     return { row: 1, column: 6, user: field[1][6] };
-  } else if (field[6][1]?.includes("P")) {
+  } else if (field[6][1]?.includes('P')) {
     return { row: 6, column: 1, user: field[6][1] };
-  } else if (field[11][6]?.includes("P")) {
+  } else if (field[11][6]?.includes('P')) {
     return { row: 11, column: 6, user: field[11][6] };
-  } else if (field[6][11]?.includes("P")) {
+  } else if (field[6][11]?.includes('P')) {
     return { row: 6, column: 11, user: field[6][11] };
   }
 };
@@ -93,27 +93,27 @@ const checkSafeAroundScenario = (
 };
 
 const changePosition = (user, move) => {
-  if (move === "R") {
+  if (move === 'R') {
     return {
       ...user,
       user: `P${NEXT_MOVE_RIGHT[user.user[-1]]}`,
     };
   }
-  if (move === "L") {
+  if (move === 'L') {
     return {
       ...user,
       user: `P${NEXT_MOVE_LEFT[user.user[-1]]}`,
     };
   }
-  if (move === "M") {
+  if (move === 'M') {
     switch (user.user) {
-      case "PS":
+      case 'PS':
         return { ...user, row: user.row + 1 };
-      case "PN":
+      case 'PN':
         return { ...user, row: user.row - 1 };
-      case "PE":
+      case 'PE':
         return { ...user, column: user.column + 1 };
-      case "PW":
+      case 'PW':
         return { ...user, column: user.column - 1 };
     }
   }
@@ -127,26 +127,26 @@ const fireImmediately = (field, userObject) => {
   const direction = user[-1];
   let fieldOfView;
   switch (direction) {
-    case "E":
+    case 'E':
       fieldOfView = field[row].slice(column, column + 5);
       break;
-    case "W":
+    case 'W':
       fieldOfView = field[row].slice(column - 5, column);
       break;
-    case "N":
+    case 'N':
       fieldOfView = transposedField.slice(row, row + 5);
       break;
-    case "S":
+    case 'S':
       fieldOfView = transposedField.slice(row - 5, row);
       break;
   }
-  return fieldOfView.some((cell) => cell[0] === "E");
+  return fieldOfView.some((cell) => cell[0] === 'E');
 };
 
-app.post("/move", (req, res) => {
+app.post('/move', (req, res) => {
   const { field, narrowingIn, gameId } = req.body;
 
-  res.setHeader("Content-Type", "application/json");
+  res.setHeader('Content-Type', 'application/json');
   res.status(200);
 
   if (!gameMemory[gameId]) {
@@ -163,10 +163,10 @@ app.post("/move", (req, res) => {
   const { narrowingLevel, user } = gameMemory[gameId];
 
   const weights = [
-    { action: "MOVE", value: 1 },
-    { action: "RIGHT", value: 0 },
-    { action: "LEFT", value: 0 },
-    { action: "FIRE", value: 0 },
+    { action: 'MOVE', value: 1 },
+    { action: 'RIGHT', value: 0 },
+    { action: 'LEFT', value: 0 },
+    { action: 'FIRE', value: 0 },
   ];
 
   const amountOfRows = 13;
@@ -202,12 +202,12 @@ app.post("/move", (req, res) => {
       ).action
     ];
 
-  const newPosition = changePosition(user, nextMove.move);
+  const newPosition = user ?? changePosition(user, nextMove.move);
 
   if (newPosition) {
     user.user = newPosition;
   }
-  
+
   return res.send(nextMove);
 });
 
