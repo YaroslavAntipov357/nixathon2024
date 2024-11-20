@@ -2,21 +2,6 @@ const express = require("express");
 const app = express();
 const cors = require("cors");
 const bodyParser = require("body-parser");
-const ICONS = require("./constants");
-
-const NEXT_MOVE_RIGHT = {
-  S: "W",
-  W: "N",
-  N: "E",
-  E: "S",
-};
-
-const NEXT_MOVE_LEFT = {
-  S: "E",
-  E: "N",
-  N: "W",
-  W: "S",
-};
 
 const port = 3000;
 
@@ -44,115 +29,6 @@ const ACTION_INDEX = {
   right: 1,
   left: 2,
   fire: 3,
-};
-
-const findInitialUser = (field) => {
-  if (field[1][6]?.includes("P")) {
-    const user = field[1][6];
-    return {
-      row: 1,
-      column: 6,
-      user,
-      isNorth: user.includes("N"),
-      isSouth: user.includes("S"),
-      isWest: user.includes("W"),
-      isEast: user.includes("E"),
-    };
-  } else if (field[6][1]?.includes("P")) {
-    const user = field[6][1];
-    return {
-      row: 6,
-      column: 1,
-      user,
-      isNorth: user.includes("N"),
-      isSouth: user.includes("S"),
-      isWest: user.includes("W"),
-      isEast: user.includes("E"),
-    };
-  } else if (field[11][6]?.includes("P")) {
-    const user = field[11][6];
-    return {
-      row: 11,
-      column: 6,
-      user,
-      isNorth: user.includes("N"),
-      isSouth: user.includes("S"),
-      isWest: user.includes("W"),
-      isEast: user.includes("E"),
-    };
-  } else if (field[6][11]?.includes("P")) {
-    const user = field[6][11];
-    return {
-      row: 6,
-      column: 11,
-      user,
-      isNorth: user.includes("N"),
-      isSouth: user.includes("S"),
-      isWest: user.includes("W"),
-      isEast: user.includes("E"),
-    };
-  }
-};
-
-const userAheadScenario = (row, column, position, weights) => {};
-
-const checkSafeAroundScenario = (
-  field,
-  row,
-  column,
-  user,
-  weights,
-  narrowingLevel
-) => {
-  if (user.row - narrowingLevel <= 0) {
-    weights[ACTION_INDEX.move] += 0.1;
-  }
-
-  if (field[row][column] === ICONS.asteroid && column === user.column) {
-    if (row - user.row === 1) {
-      weights[ACTION_INDEX.right].value += 0.1;
-      weights[ACTION_INDEX.left].value += 0.1;
-    }
-  }
-
-  if (field[row][column] === ICONS.asteroid && row === user.row) {
-    if (column - user.column === 1) {
-      weights[ACTION_INDEX.right].value += 0.1;
-      weights[ACTION_INDEX.move].value += 0.1;
-    }
-
-    if (column - user.column === -1) {
-      weights[ACTION_INDEX.left].value += 0.1;
-      weights[ACTION_INDEX.move].value += 0.1;
-    }
-  }
-};
-
-const changePosition = (user, move) => {
-  if (move === "R") {
-    return {
-      ...user,
-      user: `P${NEXT_MOVE_RIGHT[user.user[-1]]}`,
-    };
-  }
-  if (move === "L") {
-    return {
-      ...user,
-      user: `P${NEXT_MOVE_LEFT[user.user[-1]]}`,
-    };
-  }
-  if (move === "M") {
-    switch (user?.user) {
-      case "PS":
-        return { ...user, row: user.row + 1 };
-      case "PN":
-        return { ...user, row: user.row - 1 };
-      case "PE":
-        return { ...user, column: user.column + 1 };
-      case "PW":
-        return { ...user, column: user.column - 1 };
-    }
-  }
 };
 
 const fireImmediately = (field, userObject, weights) => {
@@ -239,8 +115,6 @@ app.post("/move", (req, res) => {
   res.setHeader("Content-Type", "application/json");
   res.status(200);
 
-  console.log(gameMemory);
-
   if (!gameMemory[gameId]) {
     gameMemory[gameId] = {
       narrowingLevel: 1,
@@ -280,10 +154,10 @@ app.post("/move", (req, res) => {
           row,
           column,
           user: currentUser,
-          isNorth: currentUser.includes("N"),
-          isSouth: currentUser.includes("S"),
-          isWest: currentUser.includes("W"),
-          isEast: currentUser.includes("E"),
+          isNorth: currentUser.indexOf("N") === 1,
+          isSouth: currentUser.indexOf("S") === 1,
+          isWest: currentUser.indexOf("W") === 1,
+          isEast: currentUser.indexOf("E") === 1,
         };
       }
     }
@@ -292,39 +166,15 @@ app.post("/move", (req, res) => {
   checkCellAhead(field, user, weights);
   fireImmediately(field, user, weights);
 
-  for (
-    let row = narrowingLevel;
-    row <= amountOfRows - 1 - narrowingLevel;
-    row++
-  ) {
-    for (
-      let column = narrowingLevel;
-      column <= amountOfColumns - 1 - narrowingLevel;
-      column++
-    ) {
-      // userAheadScenario(row, column, position, weights);
-      // checkSafeAroundScenario(
-      //   field,
-      //   row,
-      //   column,
-      //   user,
-      //   weights,
-      //   narrowingLevel
-      // );
-    }
-  }
-  const nextMove =
+  return res.send(
     MOVES[
       weights.reduce(
         (weight, weightToSend) =>
           weight.value > weightToSend.value ? weight : weightToSend,
         weights[0]
       ).action
-    ];
-
-  console.log(user, weights);
-
-  return res.send(nextMove);
+    ]
+  );
 });
 
 app.listen(port, () => {
