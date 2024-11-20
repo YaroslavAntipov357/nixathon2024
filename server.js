@@ -24,16 +24,20 @@ const MOVES = {
   FIRE: { move: "F" },
 };
 
-const findInitialUserPosition = (field) => {
+const findInitialUser = (field) => {
   if (field[1][6]?.includes("P")) {
-    return { row: 1, column: 6 };
+    return { row: 1, column: 6, user: field[1][6] };
   } else if (field[6][1]?.includes("P")) {
-    return { row: 6, column: 1 };
+    return { row: 6, column: 1, user: field[6][1] };
   } else if (field[11][6]?.includes("P")) {
-    return { row: 11, column: 6 };
+    return { row: 11, column: 6, user: field[11][6] };
   } else if (field[6][11]?.includes("P")) {
-    return { row: 6, column: 11 };
+    return { row: 6, column: 11, user: field[6][11] };
   }
+};
+
+const userAheadScenario = (row, column, position, weights) => {
+
 };
 
 app.post("/move", (req, res) => {
@@ -44,7 +48,7 @@ app.post("/move", (req, res) => {
 
   if (!gameMemory[gameId]) {
     gameMemory[gameId] = {
-      position: findInitialUserPosition(field),
+      user: findInitialUser(field),
       narrowingLevel: 1,
     };
   }
@@ -72,7 +76,7 @@ app.post("/move", (req, res) => {
       column <= field[0].length - 1 - narrowingLevel;
       column++
     ) {
-      console.log(row, column, position);
+      userAheadScenario(row, column, position, weights);
     }
   }
 
