@@ -1,21 +1,21 @@
-const express = require('express');
+const express = require("express");
 const app = express();
-const cors = require('cors');
-const bodyParser = require('body-parser');
-const ICONS = require('./constants');
+const cors = require("cors");
+const bodyParser = require("body-parser");
+const ICONS = require("./constants");
 
 const NEXT_MOVE_RIGHT = {
-  S: 'W',
-  W: 'N',
-  N: 'E',
-  E: 'S',
+  S: "W",
+  W: "N",
+  N: "E",
+  E: "S",
 };
 
 const NEXT_MOVE_LEFT = {
-  S: 'E',
-  E: 'N',
-  N: 'W',
-  W: 'S',
+  S: "E",
+  E: "N",
+  N: "W",
+  W: "S",
 };
 
 const port = 3000;
@@ -24,19 +24,19 @@ app.use(cors());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
-app.get('/healthz', (_req, res) => {
-  res.setHeader('Content-Type', 'application/json');
+app.get("/healthz", (_req, res) => {
+  res.setHeader("Content-Type", "application/json");
   res.status(200);
-  res.send({ status: 'OK' });
+  res.send({ status: "OK" });
 });
 
 const gameMemory = {};
 
 const MOVES = {
-  MOVE: { move: 'M' },
-  RIGHT: { move: 'R' },
-  LEFT: { move: 'L' },
-  FIRE: { move: 'F' },
+  MOVE: { move: "M" },
+  RIGHT: { move: "R" },
+  LEFT: { move: "L" },
+  FIRE: { move: "F" },
 };
 
 const ACTION_INDEX = {
@@ -49,16 +49,48 @@ const ACTION_INDEX = {
 const findInitialUser = (field) => {
   if (field[1][6]?.includes("P")) {
     const user = field[1][6];
-    return { row: 1, column: 6, user, isNorth: user.includes('N'), isSouth: user.includes('S'), isWest: user.includes('W'), isEast: user.includes('E') };
+    return {
+      row: 1,
+      column: 6,
+      user,
+      isNorth: user.includes("N"),
+      isSouth: user.includes("S"),
+      isWest: user.includes("W"),
+      isEast: user.includes("E"),
+    };
   } else if (field[6][1]?.includes("P")) {
     const user = field[6][1];
-    return { row: 6, column: 1, user, isNorth: user.includes('N'), isSouth: user.includes('S'), isWest: user.includes('W'), isEast: user.includes('E') };
+    return {
+      row: 6,
+      column: 1,
+      user,
+      isNorth: user.includes("N"),
+      isSouth: user.includes("S"),
+      isWest: user.includes("W"),
+      isEast: user.includes("E"),
+    };
   } else if (field[11][6]?.includes("P")) {
     const user = field[11][6];
-    return { row: 11, column: 6, user, isNorth: user.includes('N'), isSouth: user.includes('S'), isWest: user.includes('W'), isEast: user.includes('E') };
+    return {
+      row: 11,
+      column: 6,
+      user,
+      isNorth: user.includes("N"),
+      isSouth: user.includes("S"),
+      isWest: user.includes("W"),
+      isEast: user.includes("E"),
+    };
   } else if (field[6][11]?.includes("P")) {
     const user = field[6][11];
-    return { row: 6, column: 11, user, isNorth: user.includes('N'), isSouth: user.includes('S'), isWest: user.includes('W'), isEast: user.includes('E') };
+    return {
+      row: 6,
+      column: 11,
+      user,
+      isNorth: user.includes("N"),
+      isSouth: user.includes("S"),
+      isWest: user.includes("W"),
+      isEast: user.includes("E"),
+    };
   }
 };
 
@@ -97,27 +129,27 @@ const checkSafeAroundScenario = (
 };
 
 const changePosition = (user, move) => {
-  if (move === 'R') {
+  if (move === "R") {
     return {
       ...user,
       user: `P${NEXT_MOVE_RIGHT[user.user[-1]]}`,
     };
   }
-  if (move === 'L') {
+  if (move === "L") {
     return {
       ...user,
       user: `P${NEXT_MOVE_LEFT[user.user[-1]]}`,
     };
   }
-  if (move === 'M') {
+  if (move === "M") {
     switch (user?.user) {
-      case 'PS':
+      case "PS":
         return { ...user, row: user.row + 1 };
-      case 'PN':
+      case "PN":
         return { ...user, row: user.row - 1 };
-      case 'PE':
+      case "PE":
         return { ...user, column: user.column + 1 };
-      case 'PW':
+      case "PW":
         return { ...user, column: user.column - 1 };
     }
   }
@@ -154,65 +186,64 @@ const fireImmediately = (field, userObject, weights) => {
 const checkCellAhead = (field, user, weights) => {
   if (user?.isNorth) {
     const nextCell = field[user.row - 1][user.column];
-    if (nextCell === '_') {
+    if (nextCell === "_") {
       weights[ACTION_INDEX.move].value = weights[ACTION_INDEX.move].value + 1;
     }
-    if (nextCell === 'A') {
+    if (nextCell === "A") {
       weights[ACTION_INDEX.left].value = weights[ACTION_INDEX.left].value + 1;
     }
-    if (nextCell.indexOf('E') === 0) {
+    if (nextCell.indexOf("E") === 0) {
       weights[ACTION_INDEX.fire].value = weights[ACTION_INDEX.fire].value + 1;
     }
   }
   if (user?.isSouth) {
     const nextCell = field[user.row + 1][user.column];
-    if (nextCell === '_') {
+    if (nextCell === "_") {
       weights[ACTION_INDEX.move].value = weights[ACTION_INDEX.move].value + 1;
     }
-    if (nextCell === 'A') {
+    if (nextCell === "A") {
       weights[ACTION_INDEX.left].value = weights[ACTION_INDEX.left].value + 1;
     }
-    if (nextCell.indexOf('E') === 0) {
+    if (nextCell.indexOf("E") === 0) {
       weights[ACTION_INDEX.fire].value = weights[ACTION_INDEX.fire].value + 1;
     }
   }
   if (user?.isEast) {
     const nextCell = field[user.row][user.column + 1];
-    if (nextCell === '_') {
+    if (nextCell === "_") {
       weights[ACTION_INDEX.move].value = weights[ACTION_INDEX.move].value + 1;
     }
-    if (nextCell === 'A') {
+    if (nextCell === "A") {
       weights[ACTION_INDEX.left].value = weights[ACTION_INDEX.left].value + 1;
     }
-    if (nextCell.indexOf('E') === 0) {
+    if (nextCell.indexOf("E") === 0) {
       weights[ACTION_INDEX.fire].value = weights[ACTION_INDEX.fire].value + 1;
     }
   }
   if (user?.isWest) {
     const nextCell = field[user.row][user.column + 1];
-    if (nextCell === '_') {
+    if (nextCell === "_") {
       weights[ACTION_INDEX.move].value = weights[ACTION_INDEX.move].value + 1;
     }
-    if (nextCell === 'A') {
+    if (nextCell === "A") {
       weights[ACTION_INDEX.left].value = weights[ACTION_INDEX.left].value + 1;
     }
-    if (nextCell.indexOf('E') === 0) {
+    if (nextCell.indexOf("E") === 0) {
       weights[ACTION_INDEX.fire].value = weights[ACTION_INDEX.fire].value + 1;
     }
   }
-}
+};
 
 app.post("/move", (req, res) => {
   const { field, narrowingIn, gameId } = req.body;
 
-  res.setHeader('Content-Type', 'application/json');
+  res.setHeader("Content-Type", "application/json");
   res.status(200);
 
   console.log(gameMemory);
 
   if (!gameMemory[gameId]) {
     gameMemory[gameId] = {
-      user: findInitialUser(field),
       narrowingLevel: 1,
     };
   }
@@ -221,7 +252,7 @@ app.post("/move", (req, res) => {
     gameMemory[gameId].narrowingLevel = gameMemory[gameId].narrowingLevel + 1;
   }
 
-  let { narrowingLevel, user } = gameMemory[gameId];
+  let { narrowingLevel } = gameMemory[gameId];
 
   const weights = [
     { action: "MOVE", value: 0.1 },
@@ -232,6 +263,32 @@ app.post("/move", (req, res) => {
 
   const amountOfRows = 13;
   const amountOfColumns = 13;
+  let user;
+
+  for (
+    let row = narrowingLevel;
+    row <= amountOfRows - 1 - narrowingLevel;
+    row++
+  ) {
+    for (
+      let column = narrowingLevel;
+      column <= amountOfColumns - 1 - narrowingLevel;
+      column++
+    ) {
+      const currentUser = field[row][column];
+      if (currentUser.indexOf("P") === 0) {
+        user = {
+          row,
+          column,
+          user: currentUser,
+          isNorth: currentUser.includes("N"),
+          isSouth: currentUser.includes("S"),
+          isWest: currentUser.includes("W"),
+          isEast: currentUser.includes("E"),
+        };
+      }
+    }
+  }
 
   checkCellAhead(field, user, weights);
   // fireImmediately(field, user, weights);
@@ -266,14 +323,7 @@ app.post("/move", (req, res) => {
       ).action
     ];
 
-  const newPosition = changePosition(user, nextMove.move);
-
-  if (newPosition) {
-    gameMemory[gameId].user = newPosition;
-  }
-  console.log(user, nextMove.move, newPosition);
-
-  console.log(weights);
+  console.log(user, weights);
 
   return res.send(nextMove);
 });
