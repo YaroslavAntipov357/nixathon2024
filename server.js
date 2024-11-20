@@ -157,11 +157,23 @@ const checkCellAhead = (field, user, weights) => {
     if (nextCell === '_') {
       weights[ACTION_INDEX.move].value = weights[ACTION_INDEX.move].value + 1;
     }
+    if (nextCell === 'A') {
+      weights[ACTION_INDEX.left].value = weights[ACTION_INDEX.left].value + 1;
+    }
+    if (nextCell.indexOf('E') === 0) {
+      weights[ACTION_INDEX.fire].value = weights[ACTION_INDEX.fire].value + 1;
+    }
   }
   if (user.isSouth) {
     const nextCell = field[user.row + 1][user.column];
     if (nextCell === '_') {
       weights[ACTION_INDEX.move].value = weights[ACTION_INDEX.move].value + 1;
+    }
+    if (nextCell === 'A') {
+      weights[ACTION_INDEX.left].value = weights[ACTION_INDEX.left].value + 1;
+    }
+    if (nextCell.indexOf('E') === 0) {
+      weights[ACTION_INDEX.fire].value = weights[ACTION_INDEX.fire].value + 1;
     }
   }
   if (user.isEast) {
@@ -169,11 +181,23 @@ const checkCellAhead = (field, user, weights) => {
     if (nextCell === '_') {
       weights[ACTION_INDEX.move].value = weights[ACTION_INDEX.move].value + 1;
     }
+    if (nextCell === 'A') {
+      weights[ACTION_INDEX.left].value = weights[ACTION_INDEX.left].value + 1;
+    }
+    if (nextCell.indexOf('E') === 0) {
+      weights[ACTION_INDEX.fire].value = weights[ACTION_INDEX.fire].value + 1;
+    }
   }
   if (user.isWest) {
     const nextCell = field[user.row][user.column + 1];
     if (nextCell === '_') {
       weights[ACTION_INDEX.move].value = weights[ACTION_INDEX.move].value + 1;
+    }
+    if (nextCell === 'A') {
+      weights[ACTION_INDEX.left].value = weights[ACTION_INDEX.left].value + 1;
+    }
+    if (nextCell.indexOf('E') === 0) {
+      weights[ACTION_INDEX.fire].value = weights[ACTION_INDEX.fire].value + 1;
     }
   }
 }
