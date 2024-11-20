@@ -9,3 +9,5 @@ const ICONS = {
   west: "W",
   east: "E",
 };
+
+module.exports = ICONS;

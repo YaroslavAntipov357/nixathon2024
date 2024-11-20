@@ -2,6 +2,21 @@ const express = require("express");
 const app = express();
 const cors = require("cors");
 const bodyParser = require("body-parser");
+const ICONS = require("./constants");
+
+const NEXT_MOVE_RIGHT = {
+  S: "W",
+  W: "N",
+  N: "E",
+  E: "S",
+};
+
+const NEXT_MOVE_LEFT = {
+  S: "E",
+  E: "N",
+  N: "W",
+  W: "S",
+};
 
 const port = 3000;
 
@@ -78,17 +93,54 @@ const checkSafeAroundScenario = (
 };
 
 const changePosition = (user, move) => {
-  if (move !== "M") return user;
-  switch (user.user[-1]) {
-    case "S":
-      return { ...user, row: user.row + 1 };
-    case "N":
-      return { ...user, row: user.row - 1 };
-    case "E":
-      return { ...user, column: user.column + 1 };
-    case "W":
-      return { ...user, column: user.column - 1 };
+  if (move === "R") {
+    return {
+      ...user,
+      user: `P${NEXT_MOVE_RIGHT[user.user[-1]]}`,
+    };
   }
+  if (move === "L") {
+    return {
+      ...user,
+      user: `P${NEXT_MOVE_LEFT[user.user[-1]]}`,
+    };
+  }
+  if (move === "M") {
+    switch (user.user) {
+      case "PS":
+        return { ...user, row: user.row + 1 };
+      case "PN":
+        return { ...user, row: user.row - 1 };
+      case "PE":
+        return { ...user, column: user.column + 1 };
+      case "PW":
+        return { ...user, column: user.column - 1 };
+    }
+  }
+};
+
+const fireImmediately = (field, userObject) => {
+  const transposedField = field[0].map((_, colIndex) =>
+    array.map((row) => row[colIndex])
+  );
+  const { row, column, user } = userObject;
+  const direction = user[-1];
+  let fieldOfView;
+  switch (direction) {
+    case "E":
+      fieldOfView = field[row].slice(column, column + 5);
+      break;
+    case "W":
+      fieldOfView = field[row].slice(column - 5, column);
+      break;
+    case "N":
+      fieldOfView = transposedField.slice(row, row + 5);
+      break;
+    case "S":
+      fieldOfView = transposedField.slice(row - 5, row);
+      break;
+  }
+  return fieldOfView.some((cell) => cell[0] === "E");
 };
 
 app.post("/move", (req, res) => {
@@ -111,20 +163,23 @@ app.post("/move", (req, res) => {
   const { narrowingLevel, user } = gameMemory[gameId];
 
   const weights = [
-    { action: "MOVE", value: 0 },
+    { action: "MOVE", value: 1 },
     { action: "RIGHT", value: 0 },
     { action: "LEFT", value: 0 },
     { action: "FIRE", value: 0 },
   ];
 
+  const amountOfRows = 13;
+  const amountOfColumns = 13;
+
   for (
     let row = narrowingLevel;
-    row <= field.length - 1 - narrowingLevel;
+    row <= amountOfRows - 1 - narrowingLevel;
     row++
   ) {
     for (
       let column = narrowingLevel;
-      column <= field[0].length - 1 - narrowingLevel;
+      column <= amountOfColumns - 1 - narrowingLevel;
       column++
     ) {
       // userAheadScenario(row, column, position, weights);
@@ -138,16 +193,22 @@ app.post("/move", (req, res) => {
       // );
     }
   }
-
-  return res.send(
+  const nextMove =
     MOVES[
       weights.reduce(
         (weight, weightToSend) =>
           weight.value > weightToSend.value ? weight : weightToSend,
         weights[0]
       ).action
-    ]
-  );
+    ];
+
+  const newPosition = changePosition(user, nextMove.move);
+
+  if (newPosition) {
+    user.user = newPosition;
+  }
+  
+  return res.send(nextMove);
 });
 
 app.listen(port, () => {
