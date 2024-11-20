@@ -1,10 +1,13 @@
 const express = require('express');
 const app = express();
-const cors = require('cors')
+const cors = require('cors');
+const bodyParser = require('body-parser');
 
 const port = 3000;
 
-app.use(cors())
+app.use(cors());
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
 
 app.get('/healthz', (_req, res) => {
   res.setHeader('Content-Type', 'application/json');
@@ -12,22 +15,22 @@ app.get('/healthz', (_req, res) => {
   res.send({ status: 'OK' });
 });
 
-app.post('/move', (_req,res) => {
-  const rand = Math.random() * 10;
+const gameMemory = {};
+
+app.post('/move', (req,res) => {
+  const { field, narrowing, gameId } = req.body;
   
   res.setHeader('Content-Type', 'application/json');
   res.status(200);
 
-  if (rand <= 2.5) {
-    return res.send({ move: 'M' })
-  } else if (rand > 2.5 && rand <= 5) {
-    return res.send({ move: 'R' })
-  } else if (rand > 5 && rand <= 7.5) {
-    return res.send({ move: 'L' })
-  } else {
-    return res.send({ move: 'F' })
+  gameMemory[gameId] = {};
+  
+  for (let x = 0; x <= field.length; x++ ) {
+    for (let y = 0; y <= field[0].length; y++) {
+      
+    }
   }
-})
+});
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);

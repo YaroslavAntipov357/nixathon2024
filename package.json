@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/YaroslavAntipov357/nixathon2024#readme",
   "dependencies": {
+    "body-parser": "^1.20.3",
     "cors": "^2.8.5",
     "express": "^4.21.1"
   },
