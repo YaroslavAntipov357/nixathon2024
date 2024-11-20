@@ -65,7 +65,8 @@ const checkCellAhead = (field, user, weights) => {
       weights[ACTION_INDEX.move].value = weights[ACTION_INDEX.move].value + 1;
     }
     if (nextCell === "A") {
-      weights[ACTION_INDEX.left].value = weights[ACTION_INDEX.left].value + 1;
+      weights[ACTION_INDEX.left].value = weights[ACTION_INDEX.left].value + Math.random();
+      weights[ACTION_INDEX.right].value = weights[ACTION_INDEX.right].value + Math.random();
     }
     if (nextCell.indexOf("E") === 0) {
       weights[ACTION_INDEX.fire].value = weights[ACTION_INDEX.fire].value + 1;
@@ -77,7 +78,8 @@ const checkCellAhead = (field, user, weights) => {
       weights[ACTION_INDEX.move].value = weights[ACTION_INDEX.move].value + 1;
     }
     if (nextCell === "A") {
-      weights[ACTION_INDEX.left].value = weights[ACTION_INDEX.left].value + 1;
+      weights[ACTION_INDEX.left].value = weights[ACTION_INDEX.left].value + Math.random();
+      weights[ACTION_INDEX.right].value = weights[ACTION_INDEX.right].value + Math.random();
     }
     if (nextCell.indexOf("E") === 0) {
       weights[ACTION_INDEX.fire].value = weights[ACTION_INDEX.fire].value + 1;
@@ -89,7 +91,8 @@ const checkCellAhead = (field, user, weights) => {
       weights[ACTION_INDEX.move].value = weights[ACTION_INDEX.move].value + 1;
     }
     if (nextCell === "A") {
-      weights[ACTION_INDEX.left].value = weights[ACTION_INDEX.left].value + 1;
+      weights[ACTION_INDEX.left].value = weights[ACTION_INDEX.left].value + Math.random();
+      weights[ACTION_INDEX.right].value = weights[ACTION_INDEX.right].value + Math.random();
     }
     if (nextCell.indexOf("E") === 0) {
       weights[ACTION_INDEX.fire].value = weights[ACTION_INDEX.fire].value + 1;
@@ -101,7 +104,8 @@ const checkCellAhead = (field, user, weights) => {
       weights[ACTION_INDEX.move].value = weights[ACTION_INDEX.move].value + 1;
     }
     if (nextCell === "A") {
-      weights[ACTION_INDEX.left].value = weights[ACTION_INDEX.left].value + 1;
+      weights[ACTION_INDEX.left].value = weights[ACTION_INDEX.left].value + Math.random();
+      weights[ACTION_INDEX.right].value = weights[ACTION_INDEX.right].value + Math.random();
     }
     if (nextCell.indexOf("E") === 0) {
       weights[ACTION_INDEX.fire].value = weights[ACTION_INDEX.fire].value + 1;
